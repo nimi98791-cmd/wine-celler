@@ -1,9 +1,5 @@
-const BASE = 'https://wine-celler.onrender.com/api'
+const BASE = 'https://wine-celler.onrender.com/api';
 
-/**
- * Fetches all wines from the backend.
- * @returns {Promise<object[]>}
- */
 export async function fetchWines() {
   const res = await fetch(`${BASE}/wines`)
   const data = await res.json()
@@ -11,16 +7,29 @@ export async function fetchWines() {
   return data.data
 }
 
-/**
- * Uploads an image file and scans the wine label.
- * @param {File} file
- * @returns {Promise<object>} The newly created wine record.
- */
-export async function scanWine(file) {
+export async function scanWine(file, status = 'cellar') {
   const fd = new FormData()
   fd.append('image', file)
+  fd.append('status', status)  // תמיכה בסריקה ישירות לרשימת המשאלות
   const res = await fetch(`${BASE}/wines/scan`, { method: 'POST', body: fd })
   const data = await res.json()
   if (!res.ok) throw new Error(data.error || 'Scan failed')
   return data.data
+}
+
+export async function updateWineStatus(id, status) {
+  const res = await fetch(`${BASE}/wines/${id}/status`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status }),
+  })
+  const data = await res.json()
+  if (!res.ok) throw new Error(data.error || 'Failed to update status')
+  return data.data
+}
+
+export async function deleteWine(id) {
+  const res = await fetch(`${BASE}/wines/${id}`, { method: 'DELETE' })
+  const data = await res.json()
+  if (!res.ok) throw new Error(data.error || 'Failed to delete wine')
 }
