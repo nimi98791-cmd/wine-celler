@@ -1,6 +1,3 @@
-import { useRef } from 'react'
-
-// Shared icon props for visual consistency
 const ICON_SIZE = 'w-[22px] h-[22px]'
 const ICON_STROKE = 1.8
 
@@ -21,62 +18,27 @@ function HeartIcon({ className, filled }) {
   )
 }
 
-export default function BottomNav({ onScan, showingWishlist, onToggleWishlist, favoriteCount }) {
-  const fileInputRef = useRef(null)
-
-  const handleFileChange = e => {
-    const file = e.target.files?.[0]
-    if (file) onScan(file)
-    e.target.value = ''
-  }
-
+export default function BottomNav({ onScanClick, showingWishlist, onToggleWishlist, favoriteCount }) {
   return (
-    <>
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        className="hidden"
-        onChange={handleFileChange}
-      />
+    <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[420px] bg-neutral-900 border-t border-white/[0.07] flex justify-around items-center px-6 pt-2.5 pb-4 z-10">
+      <button onClick={onScanClick} className="flex flex-col items-center gap-1" aria-label="Scan a wine bottle">
+        <div className="w-11 h-11 rounded-full bg-wine-red flex items-center justify-center transition-colors hover:bg-wine-red-light active:scale-95">
+          <CameraIcon className={`${ICON_SIZE} text-white`} />
+        </div>
+        <span className="text-[10px] text-white/45">Scan</span>
+      </button>
 
-      <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[420px] bg-neutral-900 border-t border-white/[0.07] flex justify-around items-center px-6 pt-2.5 pb-4 z-10">
-        {/* Scan */}
-        <button
-          onClick={() => fileInputRef.current?.click()}
-          className="flex flex-col items-center gap-1"
-          aria-label="Scan a wine bottle"
-        >
-          <div className="w-11 h-11 rounded-full bg-wine-red flex items-center justify-center transition-colors hover:bg-wine-red-light active:scale-95">
-            <CameraIcon className={`${ICON_SIZE} text-white`} />
-          </div>
-          <span className="text-[10px] text-white/45">Scan</span>
-        </button>
-
-        {/* Wishlist */}
-        <button
-          onClick={onToggleWishlist}
-          className="flex flex-col items-center gap-1"
-          aria-label={showingWishlist ? 'Show all wines' : 'Show wishlist'}
-          aria-pressed={showingWishlist}
-        >
-          <div className="w-11 h-11 rounded-full flex items-center justify-center relative transition-colors hover:bg-white/[0.05] active:scale-95">
-            <HeartIcon
-              className={`${ICON_SIZE} transition-colors ${showingWishlist ? 'text-wine-red-light' : 'text-white/40'}`}
-              filled={showingWishlist}
-            />
-            {favoriteCount > 0 && (
-              <span className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-wine-red-light text-white text-[8px] flex items-center justify-center font-medium">
-                {favoriteCount}
-              </span>
-            )}
-          </div>
-          <span className={`text-[10px] transition-colors ${showingWishlist ? 'text-wine-red-light' : 'text-white/45'}`}>
-            Wishlist
-          </span>
-        </button>
-      </nav>
-    </>
+      <button onClick={onToggleWishlist} className="flex flex-col items-center gap-1" aria-label={showingWishlist ? 'Show cellar' : 'Show wishlist'} aria-pressed={showingWishlist}>
+        <div className="w-11 h-11 rounded-full flex items-center justify-center relative transition-colors hover:bg-white/[0.05] active:scale-95">
+          <HeartIcon className={`${ICON_SIZE} transition-colors ${showingWishlist ? 'text-wine-red-light' : 'text-white/40'}`} filled={showingWishlist} />
+          {favoriteCount > 0 && (
+            <span className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-wine-red-light text-white text-[8px] flex items-center justify-center font-medium">
+              {favoriteCount}
+            </span>
+          )}
+        </div>
+        <span className={`text-[10px] transition-colors ${showingWishlist ? 'text-wine-red-light' : 'text-white/45'}`}>Wishlist</span>
+      </button>
+    </nav>
   )
 }

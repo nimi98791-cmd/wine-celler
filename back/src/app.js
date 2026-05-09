@@ -1,42 +1,92 @@
-const express = require("express");
-const cors = require("cors"); 
-const wineRoutes = require("./routes/wineRoutes");
+import { useRef, useState } from 'react'
+import { useCellar } from './hooks/useCellar.js'
+import FilterBar from './components/FilterBar.jsx'
+import CellarGrid from './components/CellarGrid.jsx'
+import WineModal from './components/WineModal.jsx'
+import BottomNav from './components/BottomNav.jsx'
+import ScanningOverlay from './components/ScanningOverlay.jsx'
+import ScanModal from './components/ScanModal.jsx'
+import DeleteConfirmModal from './components/DeleteConfirmModal.jsx'
+import Toast from './components/Toast.jsx'
 
-const app = express();
-app.use(cors()); 
+export default function App() {
+  const fileInputRef = useRef(null)
+  const [scanDestination, setScanDestination] = useState(null) // 'cellar' | 'wishlist' | null
+  const [showScanModal, setShowScanModal] = useState(false)
 
-// ── Body parsers ──────────────────────────────────────────────────────────────
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+  const {
+    loading, filteredWines,
+    activeStatus, setActiveStatus,
+    activeType, setActiveType,
+    showingWishlist, toggleWishlistView,
+    scanning, toast,
+    selectedWine, setSelectedWine,
+    deleteTarget, setDeleteTarget,
+    handleScan, handleMoveToWishlist, handleDelete,
+  } = useCellar()
 
-// ── Welcome Route ──────────────────────────────
-app.get("/", (req, res) => {
-  res.json({ success: true, message: "Wine Cellar API is up and running!" });
-});
+  // User taps Scan → show destination picker
+  const handleScanClick = () => setShowScanModal(true)
 
-// ── Health check ──────────────────────────────────────────────────────────────
-app.get("/health", (req, res) => {
-  res.json({ status: "ok", timestamp: new Date().toISOString() });
-});
-
-// ── API routes ────────────────────────────────────────────────────────────────
-app.use("/api/wines", wineRoutes);
-
-// ── 404 handler ───────────────────────────────────────────────────────────────
-app.use((req, res) => {
-  res.status(404).json({ success: false, error: `Route ${req.method} ${req.path} not found.` });
-});
-
-// ── Global error handler (catches errors from middleware, e.g. multer) ────────
-app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
-  if (err.code === "LIMIT_FILE_SIZE") {
-    return res.status(413).json({ success: false, error: "Image exceeds the 10 MB size limit." });
+  // User picks cellar or wishlist → open file picker
+  const handleDestinationChosen = (status) => {
+    setScanDestination(status)
+    setShowScanModal(false)
+    fileInputRef.current?.click()
   }
-  if (err.message && err.message.startsWith("Unsupported file type")) {
-    return res.status(415).json({ success: false, error: err.message });
-  }
-  console.error("[Global] Unhandled error:", err);
-  res.status(500).json({ success: false, error: "An unexpected server error occurred." });
-});
 
-module.exports = app;
+  const handleFileChange = e => {
+    const file = e.target.files?.[0]
+    if (file) handleScan(file, scanDestination || 'cellar')
+    e.target.value = ''
+  }
+
+  return (
+    <div className="max-w-[420px] mx-auto min-h-screen bg-neutral-900 flex flex-col">
+      <input ref={fileInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFileChange} />
+
+      <FilterBar activeStatus={activeStatus} setActiveStatus={setActiveStatus} activeType={activeType} setActiveType={setActiveType} />
+
+      <CellarGrid
+        wines={filteredWines}
+        loading={loading}
+        onToggleFavorite={() => {}} // favorites are local-only; pass your favorites state if needed
+        favorites={new Set()}
+        onOpenWine={setSelectedWine}
+      />
+
+      <BottomNav
+        onScanClick={handleScanClick}
+        showingWishlist={showingWishlist}
+        onToggleWishlist={toggleWishlistView}
+        favoriteCount={0}
+      />
+
+      {showScanModal && (
+        <ScanModal onScan={handleDestinationChosen} onCancel={() => setShowScanModal(false)} />
+      )}
+
+      {selectedWine && (
+        <WineModal
+          wine={selectedWine}
+          isFavorite={false}
+          onToggleFavorite={() => {}}
+          onClose={() => setSelectedWine(null)}
+          onDelete={(wine) => setDeleteTarget(wine)}
+        />
+      )}
+
+      {deleteTarget && (
+        <DeleteConfirmModal
+          wine={deleteTarget}
+          onMoveToWishlist={handleMoveToWishlist}
+          onDelete={handleDelete}
+          onCancel={() => setDeleteTarget(null)}
+        />
+      )}
+
+      {scanning && <ScanningOverlay />}
+      <Toast toast={toast} />
+    </div>
+  )
+}

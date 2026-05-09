@@ -1,66 +1,35 @@
-import { useCellar } from './hooks/useCellar.js'
-import FilterBar from './components/FilterBar.jsx'
-import CellarGrid from './components/CellarGrid.jsx'
-import WineModal from './components/WineModal.jsx'
-import BottomNav from './components/BottomNav.jsx'
-import ScanningOverlay from './components/ScanningOverlay.jsx'
-import Toast from './components/Toast.jsx'
+const BASE = 'https://wine-celler.onrender.com/api';
 
-export default function App() {
-  const {
-    filteredWines,
-    favorites,
-    loading,
-    activeStatus,
-    setActiveStatus,
-    activeType,
-    setActiveType,
-    showingWishlist,
-    toggleWishlistView,
-    scanning,
-    toast,
-    selectedWine,
-    setSelectedWine,
-    toggleFavorite,
-    handleScan,
-  } = useCellar()
+export async function fetchWines() {
+  const res = await fetch(`${BASE}/wines`)
+  const data = await res.json()
+  if (!res.ok) throw new Error(data.error || 'Failed to fetch wines')
+  return data.data
+}
 
-  return (
-    <div className="max-w-[420px] mx-auto min-h-screen bg-neutral-900 flex flex-col">
-      <FilterBar
-        activeStatus={activeStatus}
-        setActiveStatus={setActiveStatus}
-        activeType={activeType}
-        setActiveType={setActiveType}
-      />
+export async function scanWine(file, status = 'cellar') {
+  const fd = new FormData()
+  fd.append('image', file)
+  fd.append('status', status)  // 'cellar' or 'wishlist'
+  const res = await fetch(`${BASE}/wines/scan`, { method: 'POST', body: fd })
+  const data = await res.json()
+  if (!res.ok) throw new Error(data.error || 'Scan failed')
+  return data.data
+}
 
-      <CellarGrid
-        wines={filteredWines}
-        favorites={favorites}
-        onToggleFavorite={toggleFavorite}
-        onOpenWine={setSelectedWine}
-        loading={loading}
-      />
+export async function updateWineStatus(id, status) {
+  const res = await fetch(`${BASE}/wines/${id}/status`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status }),
+  })
+  const data = await res.json()
+  if (!res.ok) throw new Error(data.error || 'Failed to update status')
+  return data.data
+}
 
-      <BottomNav
-        onScan={handleScan}
-        showingWishlist={showingWishlist}
-        onToggleWishlist={toggleWishlistView}
-        favoriteCount={favorites.size}
-      />
-
-      {selectedWine && (
-        <WineModal
-          wine={selectedWine}
-          isFavorite={favorites.has(selectedWine.id)}
-          onToggleFavorite={toggleFavorite}
-          onClose={() => setSelectedWine(null)}
-        />
-      )}
-
-      {scanning && <ScanningOverlay />}
-
-      <Toast toast={toast} />
-    </div>
-  )
+export async function deleteWine(id) {
+  const res = await fetch(`${BASE}/wines/${id}`, { method: 'DELETE' })
+  const data = await res.json()
+  if (!res.ok) throw new Error(data.error || 'Failed to delete wine')
 }
