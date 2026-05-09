@@ -30,7 +30,7 @@ Rules:
 `.trim();
 
 // ─── Model config ─────────────────────────────────────────────────────────────
-const MODEL_NAME = "gemini-1.5-flash";
+const MODEL_NAME = "gemini-1.5-flash-latest";
 
 let genAI;
 function getClient() {
