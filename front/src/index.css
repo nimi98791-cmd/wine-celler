@@ -1,0 +1,29 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+  html, body, #root {
+    height: 100%;
+    background-color: #171717;
+  }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  /* Hide scrollbar on filter rows */
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+}
+
+@layer utilities {
+  .bottle-red    { background-color: #4A1020; }
+  .bottle-white  { background-color: #4A3C18; }
+  .bottle-rose   { background-color: #5C2234; }
+  .bottle-orange { background-color: #5C3010; }
+  .bottle-sparkling { background-color: #1A3A28; }
+  .bottle-other  { background-color: #2A2A2A; }
+}
