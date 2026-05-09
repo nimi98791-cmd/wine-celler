@@ -1,3 +1,5 @@
+import WineCard from './WineCard';
+
 export default function CellarGrid({ wines, favorites, onToggleFavorite, onOpenWine, loading }) {
   if (loading) {
     return (
