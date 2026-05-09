@@ -30,7 +30,7 @@ Rules:
 `.trim();
 
 // ─── Model config ─────────────────────────────────────────────────────────────
-const MODEL_NAME = "gemini-1.5-flash";
+const MODEL_NAME = "gemini-1.5-flash-latest";
 
 let genAI;
 function getClient() {
@@ -54,10 +54,9 @@ function getClient() {
 async function analyzeWineImage(imageBuffer, mimeType) {
   const model = getClient().getGenerativeModel({
     model: MODEL_NAME,
-    systemInstruction: SYSTEM_PROMPT,
     generationConfig: {
-      responseMimeType: "application/json", // force JSON output at the API level
-      temperature: 0.2,                     // low temp = more deterministic extraction
+      responseMimeType: "application/json", 
+      temperature: 0.2,                     
       maxOutputTokens: 1024,
     },
   });
@@ -72,7 +71,7 @@ async function analyzeWineImage(imageBuffer, mimeType) {
   let result;
   try {
     result = await model.generateContent([
-      "Analyse this wine bottle label and return the JSON as instructed.",
+      SYSTEM_PROMPT + "\n\nAnalyse this wine bottle label and return the JSON as instructed.",
       imagePart,
     ]);
   } catch (err) {
