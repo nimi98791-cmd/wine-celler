@@ -1,7 +1,9 @@
 const express = require("express");
+const cors = require("cors");
 const wineRoutes = require("./routes/wineRoutes");
 
 const app = express();
+app.use(cors());
 
 // ── Body parsers ──────────────────────────────────────────────────────────────
 app.use(express.json());
