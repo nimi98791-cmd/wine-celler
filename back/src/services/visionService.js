@@ -45,7 +45,7 @@ async function analyzeWineImage(imageBuffer, mimeType) {
     model: MODEL_NAME,
     generationConfig: {
       temperature: 0.2,
-      maxOutputTokens: 1024,
+      maxOutputTokens: 2048,
     },
   });
 
