@@ -56,7 +56,6 @@ async function analyzeWineImage(imageBuffer, mimeType) {
 
   let result;
   try {
-    // הוספת הפרומפט לכאן כדי למנוע את באג גרסת v1beta
     result = await model.generateContent([
       SYSTEM_PROMPT + "\n\nAnalyse this wine bottle label and return the JSON as instructed.",
       imagePart,
@@ -64,14 +63,14 @@ async function analyzeWineImage(imageBuffer, mimeType) {
   } catch (err) {
     throw new Error(`Gemini API call failed: ${err.message}`);
   }
-
   const rawText = result.response.text().trim();
-
+  let cleanText = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
   let parsed;
   try {
-    parsed = JSON.parse(rawText);
-  } catch {
-    throw new Error(`Vision API returned non-JSON output: ${rawText.slice(0, 200)}`);
+    parsed = JSON.parse(cleanText);
+  } catch (parseError) {
+    console.error("❌ JSON Parse Error. Full failed Gemini response:\n", cleanText);
+    throw new Error(`Vision API returned invalid JSON. Check Render logs for the full text.`);
   }
 
   if (parsed.error === "unreadable_label") {
