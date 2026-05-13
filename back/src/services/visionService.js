@@ -54,14 +54,17 @@ async function analyzeWineImage(imageBuffer, mimeType) {
   };
 
   let result;
-  try {
-    result = await model.generateContent([
-      SYSTEM_PROMPT + "\n\nAnalyse this wine bottle label and return the JSON as instructed.",
-      imagePart,
-    ]);
-  } catch (err) {
-    throw new Error(`Gemini API call failed: ${err.message}`);
+ try {
+  result = await model.generateContent([
+    SYSTEM_PROMPT + "\n\nAnalyse this wine bottle label and return the JSON as instructed.",
+    imagePart,
+  ]);
+} catch (err) {
+  if (err.message.includes("503") || err.message.includes("high demand")) {
+    throw new Error("Google's AI servers are busy. Please try again in a minute.");
   }
+  throw new Error(`Gemini API call failed: ${err.message}`);
+}
   const rawText = result.response.text().trim();
   let cleanText = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
   let parsed;
