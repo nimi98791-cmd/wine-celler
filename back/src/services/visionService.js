@@ -44,7 +44,6 @@ async function analyzeWineImage(imageBuffer, mimeType) {
   const model = getClient().getGenerativeModel({
     model: MODEL_NAME,
     generationConfig: {
-      responseMimeType: "application/json",
       temperature: 0.2,
       maxOutputTokens: 1024,
     },
