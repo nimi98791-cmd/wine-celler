@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { useCellar } from './hooks/useCellar.js'
 import FilterBar from './components/FilterBar.jsx'
 import CellarGrid from './components/CellarGrid.jsx'
@@ -10,6 +10,19 @@ import DeleteConfirmModal from './components/DeleteConfirmModal.jsx'
 import Toast from './components/Toast.jsx'
 
 export default function App() {
+  useEffect(() => {
+    const hasSeenNotice = localStorage.getItem('hasSeenWineNotice');
+    
+    if (!hasSeenNotice) {
+      alert(
+        "Welcome to my Wine Cellar App!\n\n" +
+        "Please note: This live application currently displays my personal wine collection data.\n\n" +
+        "An advanced multi-user authentication system is under development and will be deployed soon!"
+      );
+      localStorage.setItem('hasSeenWineNotice', 'true');
+    }
+  }, []);
+  
   const fileInputRef = useRef(null)
   const [scanDestination, setScanDestination] = useState(null) // 'cellar' | 'wishlist' | null
   const [showScanModal, setShowScanModal] = useState(false)
